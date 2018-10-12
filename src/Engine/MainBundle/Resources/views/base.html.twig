@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,500,500i,700,700i" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
     <link href="{{ asset('bundles/main/css/reset.css') }}" rel="stylesheet" media="screen"/>
+    <link href="{{ asset('bundles/main/css/bootstrap.min.css') }}" rel="stylesheet" media="screen"/>
     <link href="{{ asset('bundles/main/css/main.css') }}" rel="stylesheet" media="screen"/>
     {% block stylesheets %}
     {% endblock %}
@@ -48,8 +49,8 @@
                 <li{% if currentPath == "main_index" %} class="active"{% endif %}>
                     <a {% if currentPath != "main_index" %}href="{{ path("main_index") }}"{% endif %}>Home</a>
                 </li>
-                <li{% if currentPath == "main_careers" %} class="active"{% endif %}>
-                    <a href="{{ path("main_careers") }}">Careers</a>
+                <li{% if currentPath == "blog_index" %} class="active"{% endif %}>
+                    <a href="{{ path("blog_index") }}">Blog</a>
                 </li>
             </ul>
         </nav>
