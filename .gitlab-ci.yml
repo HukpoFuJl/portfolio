@@ -1,0 +1,159 @@
+---
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  APP_NAME: eon-app
+  AWS_DEFAULT_REGION: us-east-1
+  S3_BUCKET: elasticbeanstalk-us-east-1-496580539910
+  DEBIAN_FRONTEND: noninteractive
+  healthCheckInterval: 60s
+  healthCheckResultFile: /tmp/aws_env_health.log
+
+.common_env_config: &common_env_config |
+  cp app/config/parameters.yml.template app/config/parameters.yml
+  sed -i "s|%db_name%|${db_name}|g" app/config/parameters.yml
+  sed -i "s|%mailer_user%|${mailer_user}|g" app/config/parameters.yml
+  sed -i "s|%mailer_password%|${mailer_password}|g" app/config/parameters.yml
+  # Configure AWS EB 'httpd' daemon
+  sed -i "s|%{HTTP_HOST}|${https_host}|g" app/config/aws-ci-cd/02-apache-https-redirect.config
+
+.prepare_container: &prepare_container |
+  # Prepare variables
+  export timeStamp=$(date '+%Y-%m-%d-%s')
+  export fileName="${APP_ENV}-$timeStamp.zip"
+  export S3_KEY="${APP_NAME}/$fileName"
+  # Install "zip"
+  apt-get update >/dev/null && apt-get install -yq zip >/dev/null
+  # Install PIP
+  curl -s -O https://bootstrap.pypa.io/get-pip.py
+  python get-pip.py >/dev/null
+  # Install AWS CLI
+  pip install -q awscli
+
+.provide_eb_config: &provide_eb_config |
+  # Ensure EB configu directory exists
+  mkdir -p .ebextensions
+  # Provide config(s): to clear previous artefacts, to configure AWS EB environment, to configure Apache redirect to
+  # HTTPS, update Composer, to execute post-deployment steps (e.g. migrations)
+  cp --force app/config/aws-ci-cd/*.config .ebextensions/
+
+.deploy_aws_eb: &deploy_aws_eb |
+  # Create archive with new app version
+  zip -r -T -9 -q $fileName . -x *.git*
+  # Copy the app to S3
+  aws s3 cp $fileName "s3://$S3_BUCKET/$S3_KEY" >/dev/null
+  # Create a new version in EB
+  aws elasticbeanstalk create-application-version --application-name "${APP_NAME}" --version-label "${APP_ENV}-$timeStamp" --description "${APP_ENV}-$timeStamp" --source-bundle S3Bucket="$S3_BUCKET",S3Key="$S3_KEY" --auto-create-application
+  # Update to that version
+  aws elasticbeanstalk update-environment --application-name "${APP_NAME}" --environment-name "${APP_ENV}" --version-label "${APP_ENV}-$timeStamp"
+  # Make a delay for ${healthCheckInterval} sec.
+  sleep $healthCheckInterval
+  # Check health (AWS CLI doesn't allow to use 'pipe'-operator, so we have to save environment health in the file)
+  aws elasticbeanstalk describe-environment-health --environment-name "${APP_ENV}" --attribute-names All >${healthCheckResultFile}
+  if ! grep '"Green"' ${healthCheckResultFile} ; then echo "$(date '+%Y-%m-%d %T') - [*ERROR] - '${APP_ENV}' Health-check failed!" ; exit 1 ; fi
+
+build_project:
+  stage: build
+  image: php:7.1
+  services:
+    - mysql:latest
+  variables:
+    # Configure mysql service (https://hub.docker.com/_/mysql/)
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_USER: symfony
+    MYSQL_PASSWORD: symfony
+    SYMFONY_ENV: prod
+    consoleOptions: "--env=${SYMFONY_ENV} --no-interaction --no-debug"
+  cache:
+    key: "${CI_COMMIT_REF_NAME}"
+    paths:
+      - vendor/
+  script:
+    # Prepare configuration
+    - *common_env_config
+    # Configure parameters specific for the current environment
+    - sed -i "s|%db_host%|mysql|g" app/config/parameters.yml
+    - sed -i "s|%db_user%|root|g" app/config/parameters.yml
+    - sed -i "s|%db_pass%|${MYSQL_ROOT_PASSWORD}|g" app/config/parameters.yml
+    # Update APT cache (mandatory)
+    - apt-get update > /dev/null
+    # Install prerequisities
+    - apt-get -yqq install zip git-core libicu-dev libxml2-dev libxslt-dev zlib1g-dev g++ > /dev/null
+    - docker-php-ext-configure intl > /dev/null
+    - docker-php-ext-install -j$(nproc) intl mysqli pdo_mysql soap xmlrpc xsl zip > /dev/null
+    # Install Composer
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer
+    # Install bundles and assets
+    - composer install --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts --no-interaction --no-progress
+    # Create DB
+    - php bin/console doctrine:database:create --if-not-exists ${consoleOptions}
+    - php bin/console doctrine:schema:update --force --complete ${consoleOptions}
+    # Mark all migrations as executed
+    - php bin/console doctrine:migrations:version --add --all ${consoleOptions}
+  only:
+    - branches
+  except:
+    - develop
+    - master
+    - tags
+  tags:
+    - docker
+
+deploy_SBX:
+  stage: deploy
+  image: python:latest
+  variables:
+    APP_ENV: EonHp-Test
+    https_host: sbx.eonhp.com
+  environment:
+    name: SBX
+    url: https://${https_host}/
+  script:
+    # Make common preparation steps
+    - *prepare_container
+    # Prepare configuration
+    - |
+      echo -e "User-agent: * \nDisallow: /" > web/robots.txt
+    - *common_env_config
+    # Configure parameters specific for the current environment
+    - sed -i "s|%db_host%|${db_host_SBX}|g" app/config/parameters.yml
+    - sed -i "s|%db_user%|${db_user}|g" app/config/parameters.yml
+    - sed -i "s|%db_pass%|${db_pass}|g" app/config/parameters.yml
+    # Provide files to configure AWS EB
+    - *provide_eb_config
+    # Deploy to AWS EB
+    - *deploy_aws_eb
+  only:
+    - develop
+  tags:
+    - docker
+
+deploy_PROD:
+  stage: deploy
+  image: python:latest
+  variables:
+    APP_ENV: eon-env
+    https_host: www.eonhp.com
+  environment:
+    name: PROD
+    url: https://${https_host}/
+  script:
+    # Make common preparation steps
+    - *prepare_container
+    # Prepare configuration
+    - *common_env_config
+    # Configure parameters specific for the current environment
+    - sed -i "s|%db_host%|${db_host_PROD}|g" app/config/parameters.yml
+    - sed -i "s|%db_user%|${db_user}|g" app/config/parameters.yml
+    - sed -i "s|%db_pass%|${db_pass}|g" app/config/parameters.yml
+    # Provide files to configure AWS EB
+    - *provide_eb_config
+    # Deploy to AWS EB
+    - *deploy_aws_eb
+  only:
+    - master
+  tags:
+    - docker

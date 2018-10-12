@@ -1,0 +1,14 @@
+parameters:
+  database_host: %db_host%
+  database_port: 3306
+  database_name: %db_name%
+  database_user: %db_user%
+  database_password: %db_pass%
+  mailer_transport: smtp
+  mailer_host: email-smtp.us-east-1.amazonaws.com
+  mailer_user: %mailer_user%
+  mailer_password: %mailer_password%
+  mailer_auth_mode: login
+  mailer_encryption: tls
+  mailer_port: 587
+  secret: 44f22da9f7524af80c794b7de184b8f59810ab3b

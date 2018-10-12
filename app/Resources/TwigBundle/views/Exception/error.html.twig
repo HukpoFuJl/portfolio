@@ -1,0 +1,25 @@
+{% extends "@Main/base.html.twig" %}
+
+{% block title %}404{% endblock %}
+
+{% block content %}
+
+    <div class="breadcrumbs">
+        <div class="container">
+            <ul class="list-inline">
+                <li><a href="{{ path("main_index") }}">Home</a></li>
+                <li>404</li>
+            </ul>
+        </div>
+    </div>
+    <div class="content">
+        <div class="container">
+            <div class="row">
+                <div class="col-10" style="padding: 30px 0; text-align: center">
+                    <h1><span style="font-size: 72px;margin-bottom: 20px">404</span></h1>
+                    <p style="font-size: 32px">Sorry, the page you are looking for can't be found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

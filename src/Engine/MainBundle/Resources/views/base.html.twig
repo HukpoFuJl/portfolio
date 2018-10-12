@@ -1,0 +1,74 @@
+{% set currentPath = app.request.get('_route') %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    {% set _block = block('title') %}
+    <title>{% block title %}{% endblock %}{% if _block is not empty %} - {% endif %}{{ sitename }}</title>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,500,500i,700,700i" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link href="{{ asset('bundles/main/css/reset.css') }}" rel="stylesheet" media="screen"/>
+    <link href="{{ asset('bundles/main/css/main.css') }}" rel="stylesheet" media="screen"/>
+    {% block stylesheets %}
+    {% endblock %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+</head>
+<body data-fs="{% if app.request.cookies.has("fs") %}{{ app.request.cookies.get("fs") }}{% else %}normal{% endif %}">
+    <div class="top-panel">
+        <div class="container">
+            <div class="row">
+                <div class="col-2">
+                </div>
+                <div class="col-10 text-right">
+                    <ul class="list-inline links">
+                        <li><a href="{{ path('admin_home') }}" class="link">Admin Panel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-2">
+                <a href="{{ path("main_index") }}" class="logo"><img src="{{ asset('bundles/main/images/logo.png') }}" alt=""/></a>
+            </div>
+            <div class="col-7">
+            </div>
+            <div class="col-3">
+            </div>
+        </div>
+    </div>
+</header>
+<div class="menu">
+    <div class="container">
+        <nav>
+            <ul class="list-inline text-center">
+                <li{% if currentPath == "main_index" %} class="active"{% endif %}>
+                    <a {% if currentPath != "main_index" %}href="{{ path("main_index") }}"{% endif %}>Home</a>
+                </li>
+                <li{% if currentPath == "main_careers" %} class="active"{% endif %}>
+                    <a href="{{ path("main_careers") }}">Careers</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% block content %}
+{% endblock %}
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-7">2008 - {{ "now"|date("Y") }} &copy; Birillo Alexey</div>
+            <div class="col-5 text-right">Just for demo</div>
+        </div>
+    </div>
+</footer>
+<script type="text/javascript" src="{{ asset('bundles/main/js/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('bundles/main/js/main.js') }}"></script>
+{% block javascripts %}
+{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+engine_user:
+    resource: "@UserBundle/Controller/"
+    type:     annotation
+engine_user_admin:
+    resource: "@UserBundle/Admin/Controller/"
+    type:     annotation
+
+
+fos_user_group:
+    resource: "@FOSUserBundle/Resources/config/routing/group.xml"
+    prefix: /group
+
+
+engine_eon:
+    resource: "@MainBundle/Controller/"
+    type:     annotation
+
+#engine_user:
+#    resource: "@UserBundle/Controller/"
+#    type:     annotation
+
+engine_admin:
+    resource: "@AdminBundle/Controller/"
+    type:     annotation
+
+engine_blog:
+    resource: "@BlogBundle/Controller/"
+    type: annotation
+engine_blog_admin:
+    resource: "@BlogBundle/Admin/Controller/"
+    type: annotation

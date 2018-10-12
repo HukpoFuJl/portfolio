@@ -1,0 +1,96 @@
+{% extends '@Admin/base.html.twig' %}
+
+{% block h1 %}
+    {% if form.vars.value.id is not null %}
+        Edit user <small>{{ form.vars.value.username }}</small>
+    {% else %}
+        Create new user
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li class="active"><a href="{{ path("user_admin_list") }}">Users</a></li>
+    <li class="active">{% if form.vars.value.id is not null %}Edit{% else %}Create{% endif %} user</li>
+{% endblock %}
+
+{% block page_content %}
+
+    {{ form_start(form) }}
+    <div class="form-wrapper row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">General Info</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group">
+                                    {{ form_row(form.username, {"attr": {"class": "form-control"}}) }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group">
+                                    {{ form_row(form.email, {"attr": {"class": "form-control"}}) }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group">
+                                    {{ form_row(form.plainPassword, {"attr": {"class": "form-control"}}) }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group" style="padding-top: 22px">
+                                    <label>{{ form_widget(form.enabled, {"attr": {"class": "form-control"}}) }} <span>Activated</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Groups</h3>
+                        <div class="pull-right box-tools">
+                            <button type="button" class="btn btn-default btn-sm" data-widget="collapse" data-toggle="tooltip">
+                                <i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body" id="groups_select">
+                        <div class="form-group">
+                            {{ form_row(form.groups) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="col-md-12">
+            <div class="text-right">
+                <a href="{{ path("user_admin_list") }}" class="btn btn-default btn-cancel">Cancel</a>
+                {{ form_widget(form.save, {"attr": {"class": "btn btn-success", "style": "margin-left:10px" }}) }}
+            </div>
+        </div>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        $(function () {
+            $("#groups_select").find('select').select2();
+
+            $('input[type=checkbox],input[type=radio]').iCheck({
+                checkboxClass: 'icheckbox_minimal-blue',
+                radioClass: 'iradio_minimal-blue'
+            });
+        });
+    </script>
+    <script src="{{ asset('bundles/admin/plugins/select2/select2.full.min.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/select2/select2.min.css') }}">
+    {{ parent() }}
+{% endblock %}

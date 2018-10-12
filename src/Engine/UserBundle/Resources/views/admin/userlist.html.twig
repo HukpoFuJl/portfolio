@@ -1,0 +1,101 @@
+{% extends '@Admin/base.html.twig' %}
+
+{% block page_content %}
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">User list</h3>
+                    <a href="{{ path('user_admin_create') }}" class="btn btn-success pull-right">New User</a>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table id="userTable" class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>E-Mail</th>
+                            <th class="text-right">Last Login</th>
+                            <th>Groups</th>
+                            <th style="width: 50px" class="text-center">Active</th>
+                            <th style="width: 100px" class="text-center">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td class="text-right">{{ user.lastLogin|date }}</td>
+                                <td>
+                                    {% for group in user.groups %}
+                                        <abbr class="label bg-green">{{ group.name }}</abbr>
+                                    {% endfor %}
+                                </td>
+                                <td class="text-center">
+                                    {% if user.enabled %}
+                                        <i class="fa fa-check"></i>
+                                    {% else %}
+                                        <i class="fa fa-times"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ path('user_admin_edit',{'id':user.id}) }}" class="btn btn-xs btn-warning">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-xs btn-danger">
+                                        <i class="fa fa-remove" title="Remove"></i>
+                                    </a>
+                                </td>
+                            </tr>
+
+
+                        {% endfor %}
+                        </tbody>
+                        {#<tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>E-Mail</th>
+                            <th>Last Login</th>
+                            <th>Roles</th>
+                        </tr>
+                        </tfoot>#}
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script src="{{ asset('bundles/admin/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('bundles/admin/plugins/datatables/dataTables.bootstrap.min.js') }}"></script>
+    <script>
+        $(function () {
+            $('#userTable').DataTable({
+                "paging": true,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false
+            });
+        });
+    </script>
+{% endblock %}
+{% block styles %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block scripts_other %}
+{% endblock %}
+{% block styles_other %}
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends '@Admin/base.html.twig' %}
+
+{% block h1 %}
+    {% if form.vars.value.id is not null %}
+        Edit group <small>{{ form.vars.value.name }}</small>
+    {% else %}
+        Create new group
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li class="active"><a href="{{ path("user_admin_group_list") }}">Groups</a></li>
+    <li class="active">{% if form.vars.value.id is not null %}Edit{% else %}Create{% endif %} user</li>
+{% endblock %}
+
+{% block page_content %}
+
+    {{ form_start(form) }}
+    <div class="form-wrapper row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">General Info</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group">
+                                    {{ form_row(form.name, {"attr": {"class": "form-control"}}) }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6">
+                                <div class="form-group">
+                                    {{ form_row(form.parent, {"attr": {"class": "form-control"}}) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Permissions</h3>
+                        <div class="pull-right box-tools">
+                            <button type="button" class="btn btn-default btn-sm" data-widget="collapse" data-toggle="tooltip">
+                                <i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body" id="permissions_select">
+                        <div class="form-group">
+                            {{ form_row(form.permissions) }}
+                            {{ dump(form.permissions.vars['choices']) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="col-md-12">
+            <div class="text-right">
+                <a href="{{ path("user_admin_group_list") }}" class="btn btn-default btn-cancel">Cancel</a>
+                {{ form_widget(form.save, {"attr": {"class": "btn btn-success", "style": "margin-left:10px" }}) }}
+            </div>
+        </div>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        $(function () {
+            $("#permissions_select").find('select').select2();
+
+            $('input[type=checkbox],input[type=radio]').iCheck({
+                checkboxClass: 'icheckbox_minimal-blue',
+                radioClass: 'iradio_minimal-blue'
+            });
+        });
+    </script>
+    <script src="{{ asset('bundles/admin/plugins/select2/select2.full.min.js') }}"></script>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/select2/select2.min.css') }}">
+    {{ parent() }}
+{% endblock %}
