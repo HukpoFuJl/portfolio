@@ -51,10 +51,10 @@
                     <div class="box-body" id="permissions_select">
                         <div class="form-group">
                             {{ form_row(form.permissions) }}
-                            {{ dump(form.permissions.vars['choices']) }}
                         </div>
                     </div>
                 </div>
+                {{ dump(form.permissions.vars['choices']) }}
             </div>
         <div class="col-md-12">
             <div class="text-right">

@@ -7,6 +7,7 @@
  */
 namespace Engine\UserBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use FOS\UserBundle\Model\Group as BaseGroup;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -45,19 +46,25 @@ class Group extends BaseGroup
 	 *      inverseJoinColumns={@ORM\JoinColumn(name="perm_id", referencedColumnName="id")}
 	 * )
 	 *
-	 * @var  $permissions \Doctrine\Common\Collections\Collection
+	 * @var  $permissions \Doctrine\Common\Collections\ArrayCollection
 	 */
 	protected $permissions;
 
+    public function __construct($name)
+    {
+        parent::__construct($name);
+        $this->permissions = new ArrayCollection();
+    }
 
-	/**
+
+    /**
 	 * Add permission
 	 *
 	 * @param \Engine\UserBundle\Entity\Permission $permission
 	 *
 	 * @return Group
 	 */
-	public function addPermission(\Engine\UserBundle\Entity\Permission $permission)
+	public function addPermission(Permission $permission)
 	{
 		$this->permissions->add($permission);
 
@@ -69,7 +76,7 @@ class Group extends BaseGroup
 	 *
 	 * @param \Engine\UserBundle\Entity\Permission $permission
 	 */
-	public function removePermission(\Engine\UserBundle\Entity\Permission $permission)
+	public function removePermission(Permission $permission)
 	{
 		$this->permissions->removeElement($permission);
 	}
@@ -91,7 +98,7 @@ class Group extends BaseGroup
 	 *
 	 * @return Group
 	 */
-	public function addChild(\Engine\UserBundle\Entity\Group $child)
+	public function addChild(Group $child)
 	{
 		$this->children->add($child);
 
@@ -103,7 +110,7 @@ class Group extends BaseGroup
 	 *
 	 * @param \Engine\UserBundle\Entity\Group $child
 	 */
-	public function removeChild(\Engine\UserBundle\Entity\Group $child)
+	public function removeChild(Group $child)
 	{
 		$this->children->removeElement($child);
 	}
@@ -125,7 +132,7 @@ class Group extends BaseGroup
 	 *
 	 * @return Group
 	 */
-	public function setParent(\Engine\UserBundle\Entity\Group $parent = null)
+	public function setParent(Group $parent = null)
 	{
 		$this->parent = $parent;
 

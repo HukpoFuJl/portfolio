@@ -8,12 +8,15 @@
 
 namespace Engine\AdminBundle\Controller;
 
+use Engine\UserBundle\Annotations\Permissions;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Route("/admin")
+ *
+ * @Permissions("admin_dashboard")
  */
 class DefaultController extends Controller
 {

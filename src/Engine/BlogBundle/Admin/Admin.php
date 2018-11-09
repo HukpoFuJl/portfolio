@@ -18,7 +18,8 @@ class Admin implements AdminInterface{
 		return new MenuItem([
 			'name'=> 'Blog',
 			'icon'=>'fa fa-newspaper-o',
-			'route'=>'blog_admin_index'
+			'route'=>'blog_admin_index',
+            'permission'=>'admin_blog'
 		]);
 	}
 
@@ -27,7 +28,7 @@ class Admin implements AdminInterface{
             new MenuItem([
                 'name'=> 'Posts',
                 'icon'=>'fa fa-newspaper-o',
-                'route'=>'blog_admin_index'
+                'route'=>'blog_admin_list'
             ]),
             new MenuItem([
                 'name'=> 'Categories',

@@ -18,7 +18,8 @@ class Admin implements AdminInterface{
 		return new MenuItem([
 			'name'=> 'Users',
 			'icon'=>'fa fa-users',
-			'route'=>'user_admin_list'
+			'route'=>'user_admin_index',
+            'permission'=>'admin_dashboard'
 		]);
 	}
 

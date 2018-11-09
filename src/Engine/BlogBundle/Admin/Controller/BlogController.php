@@ -7,6 +7,7 @@ use Engine\BlogBundle\Form\Type\Admin\BlogEditType;
 use Engine\BlogBundle\Form\Type\Admin\CategoryEditType;
 use Engine\BlogBundle\Entity\Blog;
 use Engine\BlogBundle\Entity\BlogCategories;
+use Engine\UserBundle\Annotations\Permissions;
 use Engine\UserBundle\Entity\Group;
 use Engine\UserBundle\Entity\Permission;
 use Engine\UserBundle\Entity\User;
@@ -24,14 +25,22 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * @Route("/admin/blog")
+ *
+ * @Permissions("admin_blog")
  */
 class BlogController extends Controller{
 
     /**
      * @Route("/", name="blog_admin_index")
      */
-    public function indexAction(Request $request) {
-        $this->getAdmin($request);
+    public function indexAction() {
+        return $this->redirectToRoute('blog_admin_list') ;
+    }
+
+    /**
+     * @Route("/list", name="blog_admin_list")
+     */
+    public function listAction(Request $request) {
         /** @var EntityManager $em */
         $em      = $this->get('doctrine')->getManager();
         return $this->render('@Blog/admin/bloglist.html.twig') ;
@@ -39,12 +48,11 @@ class BlogController extends Controller{
 
 
     /**
-     * @Route("/list", name="blog_admin_list")
+     * @Route("/list-json", name="blog_admin_list_json")
      * 
      * @return JsonResponse
      */
-    public function listAction(Request $request) {
-        $this->getAdmin($request);
+    public function listJsonAction(Request $request) {
         /** @var EntityManager $em */
         $em      = $this->get('doctrine')->getManager();
         $allBlog = $em->getRepository('BlogBundle:Blog')->findAll();
@@ -63,7 +71,6 @@ class BlogController extends Controller{
      * @Route("/edit/{id}", name="blog_admin_edit")
      */
     public function editAction(Request $request, $id = 0){
-        $this->getAdmin($request);
         return $this->blogEditForm($request, $id);
     }
 
@@ -71,7 +78,6 @@ class BlogController extends Controller{
      * @Route("/create", name="blog_admin_create")
      */
     public function createAction(Request $request){
-        $this->getAdmin($request);
         return $this->blogEditForm($request);
     }
 
@@ -83,7 +89,6 @@ class BlogController extends Controller{
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function deleteAction(Request $request, $id = 0){
-        $this->getAdmin($request);
         $em = $this->get('doctrine')->getManager();
         $session = $request->getSession();
         /* @var $session Session */
@@ -112,7 +117,6 @@ class BlogController extends Controller{
      * @Route("/category/create", name="blog_category_admin_create")
      */
     public function createCategoryAction(Request $request){
-        $this->getAdmin($request);
         return $this->categoryEditForm($request);
     }
 
@@ -151,7 +155,6 @@ class BlogController extends Controller{
      * @Route("/category/edit/{id}", name="blog_category_admin_edit")
      */
     public function editCategoryAction(Request $request, $id){
-        $this->getAdmin($request);
         return $this->categoryEditForm($request, $id);
     }
 
@@ -159,7 +162,6 @@ class BlogController extends Controller{
      * @Route("/category/delete/{id}", name="blog_category_admin_delete")
      */
     public function deleteCategoryAction(Request $request, $id){
-        $this->getAdmin($request);
         /** @var EntityManager $em */
         $em = $this->get('doctrine')->getManager();
         $session = $request->getSession();
@@ -189,7 +191,6 @@ class BlogController extends Controller{
      * @Route("/category", name="blog_category_admin_list")
      */
     public function categoryListAction(Request $request) {
-        $this->getAdmin($request);
         /** @var EntityManager $em */
         $em = $this->get('doctrine')->getManager();
         $categories = $em->getRepository('BlogBundle:BlogCategories')->findAll();
@@ -203,7 +204,6 @@ class BlogController extends Controller{
         if($id && $id === "upload_blog_image") {
             $this->uploadBlogImageAction($request);
         }
-        $this->getAdmin($request);
         /** @var EntityManager $em */
         $em         = $this->get('doctrine')->getManager();
         $session    = $request->getSession();
@@ -284,7 +284,6 @@ class BlogController extends Controller{
 
 
     private function categoryEditForm(Request $request, $id = null) {
-        $this->getAdmin($request);
         $em = $this->get('doctrine')->getManager();
         $session = $request->getSession();
         $categories = null;
@@ -326,20 +325,6 @@ class BlogController extends Controller{
         }
 
         return $this->render('@Blog/admin/categoryedit.html.twig', ['form' => $form->createView()]);
-    }
-
-    public function getAdmin(Request $request) {
-        $session = $request->getSession();
-        /* @var $session Session */
-        if(in_array("ROLE_ADMIN",$this->getUser()->getRoles()) ||
-            in_array("ROLE_SUPER_ADMIN",$this->getUser()->getRoles())) {
-            $session->getFlashBag()->add("adminAccess", true);
-            //$adminAccess = true;
-        }
-        else {
-            $session->getFlashBag()->add("adminAccess", false);
-            //$adminAccess = false;
-        }
     }
 
 }

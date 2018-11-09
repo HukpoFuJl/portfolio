@@ -13,4 +13,4 @@ services:
         class: Engine\UserBundle\Annotations\Driver\AnnotationDriver
         tags:
             - {name: kernel.event_listener, event: kernel.controller, method: onKernelController}
-        arguments: ["@annotation_reader"]
+        arguments: ["@annotation_reader", "@security.helper"]

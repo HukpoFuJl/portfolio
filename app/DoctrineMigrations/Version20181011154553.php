@@ -19,8 +19,17 @@ final class Version20181011154553 extends AbstractMigration
 
         $this->addSql('INSERT INTO `users` (`id`, `username`, `username_canonical`, `email`, `email_canonical`, `enabled`, `salt`, `password`, `last_login`, `confirmation_token`, `password_requested_at`, `roles`) VALUES (1, \'admin\', \'admin\', \'admin@admin.com\', \'admin@admin.com\', 1, NULL, \'$2y$13$ZJ24ihdjU/OFmPy3wJOuwOwcc4yQgX2Fl/OitTE3lDUzyQVzFlg/6\', \'2018-10-11 17:55:55\', NULL, NULL, \'a:1:{i:0;s:16:"ROLE_SUPER_ADMIN";}\');');
         $this->addSql('INSERT INTO `user_groups` (`id`, `name`, `roles`, `parent_id`) VALUES (1, \'Master\', \'a:1:{i:0;s:16:"ROLE_SUPER_ADMIN";}\', NULL);');
-        $this->addSql('INSERT INTO `user_permissions` (`id`, `name`, `desc`) VALUES (1, \'admin_dashboard\', \'Acces to view admin dashboard\'); INSERT INTO `user_permissions` (`id`, `name`, `desc`) VALUES (2, \'admin_edit_users\', \'Edit users in admin dashboard\');');
+        $this->addSql('
+                            INSERT INTO `user_permissions` (`id`, `name`, `desc`) VALUES (1, \'admin_dashboard\', \'Acces to view admin dashboard\');
+                            INSERT INTO `user_permissions` (`id`, `name`, `desc`) VALUES (2, \'admin_edit_users\', \'Edit users in admin dashboard\');
+                            INSERT INTO `user_permissions` (`id`, `name`, `desc`) VALUES (3, \'admin_blog\', \'Manage blog\');
+                            ');
         $this->addSql('INSERT INTO `users_to_user_groups` (`user_id`, `group_id`) VALUES (1, 1);');
+        $this->addSql('
+                            INSERT INTO `user_groups_to_user_permissions` (`group_id`, `perm_id`) VALUES (1, 1);
+                            INSERT INTO `user_groups_to_user_permissions` (`group_id`, `perm_id`) VALUES (1, 2);
+                            INSERT INTO `user_groups_to_user_permissions` (`group_id`, `perm_id`) VALUES (1, 3);
+                            ');
 
     }
 

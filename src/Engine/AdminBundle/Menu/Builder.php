@@ -10,6 +10,7 @@ namespace Engine\AdminBundle\Menu;
 
 use Engine\AdminBundle\Classes\AdminInterface;
 use Engine\AdminBundle\Classes\MenuItem;
+use Engine\UserBundle\Entity\User;
 use Knp\Menu\FactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
@@ -40,21 +41,35 @@ class Builder implements ContainerAwareInterface
 				$bundleAdmin = $objBundle->getAdmin();
 
 				$menuRootItem = $bundleAdmin->getMenu();
-				$menu->addChild($menuRootItem->name,
-					['route'=>$menuRootItem->route, 'routeParameters'=>$menuRootItem->routeParameters]
-				)
-				     ->setAttribute('data-icon', $menuRootItem->icon)
-				     ->setChildrenAttribute('class','treeview-menu')
-				     ->setAttribute('data-expander', 1);
+                /** @var User $user */
+                $user = $this->container->get('security.token_storage')->getToken()->getUser();
+                $allow = true;
+				if(isset($menuRootItem->permission)){
+                    $allow = $user->hasPermission($menuRootItem->permission);
+                }
+				if($allow){
+                    $menu->addChild($menuRootItem->name,
+                        ['route'=>$menuRootItem->route, 'routeParameters'=>$menuRootItem->routeParameters]
+                    )
+                        ->setAttribute('data-icon', $menuRootItem->icon)
+                        ->setChildrenAttribute('class','treeview-menu')
+                        ->setAttribute('data-expander', 1);
 
-				$menuItems = $bundleAdmin->getMenus();
-				foreach ( $menuItems as $menuItem ) {
-					/** @var $menuItem MenuItem */
-					$menu[$menuRootItem->name]->addChild($menuItem->name,
-						['route'=>$menuItem->route, 'routeParameters'=>$menuItem->routeParameters]
-					)
-					     ->setAttribute('data-icon', $menuItem->icon);
-				}
+                    $menuItems = $bundleAdmin->getMenus();
+                    foreach ( $menuItems as $menuItem ) {
+                        /** @var $menuItem MenuItem */
+                        $allow = true;
+                        if(isset($menuItem->permission)){
+                            $allow = $user->hasPermission($menuItem->permission);
+                        }
+                        if($allow){
+                            $menu[$menuRootItem->name]->addChild($menuItem->name,
+                                ['route'=>$menuItem->route, 'routeParameters'=>$menuItem->routeParameters]
+                            )
+                                ->setAttribute('data-icon', $menuItem->icon);
+                        }
+                    }
+                }
 			}
 		}
 

@@ -13,6 +13,7 @@ class MenuItem{
 	public $icon;
 	public $route;
 	public $routeParameters;
+	public $permission;
 
 	public function __construct($params) {
 		if(isset($params['name'])){
@@ -26,6 +27,9 @@ class MenuItem{
 		}
 		if(isset($params['routeParameters'])){
 			$this->routeParameters = $params['routeParameters'];
+		}
+		if(isset($params['permission'])){
+			$this->permission = $params['permission'];
 		}
 	}
 }

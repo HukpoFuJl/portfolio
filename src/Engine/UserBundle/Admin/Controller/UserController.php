@@ -9,6 +9,7 @@
 namespace Engine\UserBundle\Admin\Controller;
 
 use Doctrine\ORM\EntityManager;
+use Engine\UserBundle\Annotations\Permissions;
 use Engine\UserBundle\Entity\Group;
 use Engine\UserBundle\Entity\Permission;
 use Engine\UserBundle\Entity\User;
@@ -25,11 +26,21 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * @Route("/admin/users")
+ *
+ * @Permissions({"admin_dashboard"})
  */
 class UserController extends Controller{
 
 	/**
-	 * @Route("", name="user_admin_list")
+	 * @Route("", name="user_admin_index")
+	 */
+	public function indexAction()
+	{
+		return $this->redirectToRoute('user_admin_list');
+	}
+
+	/**
+	 * @Route("/list", name="user_admin_list")
 	 */
 	public function listAction(Request $request)
 	{
@@ -43,6 +54,8 @@ class UserController extends Controller{
 
 	/**
 	 * @Route("/edit/{id}", name="user_admin_edit")
+     *
+     * @Permissions("admin_edit_users")
 	 */
 	public function editAction(Request $request, $id){
 
@@ -51,6 +64,8 @@ class UserController extends Controller{
 
 	/**
 	 * @Route("/create", name="user_admin_create")
+     *
+     * @Permissions("admin_edit_users")
 	 */
 	public function createAction(Request $request){
 
@@ -72,6 +87,8 @@ class UserController extends Controller{
 
 	/**
 	 * @Route("/group/edit/{id}", name="user_admin_group_edit")
+     *
+     * @Permissions("admin_edit_users")
 	 */
 	public function groupEditAction(Request $request, $id){
 
@@ -80,6 +97,8 @@ class UserController extends Controller{
 
 	/**
 	 * @Route("/group/create", name="user_admin_group_create")
+     *
+     * @Permissions("admin_edit_users")
 	 */
 	public function groupCreateAction(Request $request){
 
@@ -102,11 +121,11 @@ class UserController extends Controller{
 
 	/**
 	 * @Route("/perm-test", name="user_admin_perms_chk")
+     *
+     * @Permissions("admin_dashboard")
 	 */
 	public function permChkAction(Request $request)
 	{
-
-
 		$user = $this->getUser();
 		/* @var $user User */
 		$data = [
@@ -173,6 +192,7 @@ class UserController extends Controller{
 		$groupManager = $this->get('fos_user.group_manager');
 		$session = $request->getSession();
 		$group = null;
+		$options = [];
 
 		if ($id) {
 			$group = $groupManager->findGroupBy(['id'=>$id]);
@@ -182,11 +202,12 @@ class UserController extends Controller{
 				$session->getFlashBag()->add('error', 'Group with id ' . $id . ' not found!');
 				return $this->redirectToRoute("user_admin_group_list");
 			}
+			$options['edit_group'] = $group;
 		} else {
 			$group = new Group("New Group");
 		}
 
-		$form = $this->createForm(GroupEditType::class, $group);
+		$form = $this->createForm(GroupEditType::class, $group, $options);
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {

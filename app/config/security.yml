@@ -57,8 +57,4 @@ security:
         - { path: ^/user/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/user/logout$, role: IS_AUTHENTICATED_ANONYMOUSLY }
 
-        - { path: ^/admin(.*), role: ROLE_ADMIN }
-
-    role_hierarchy:
-        ROLE_ADMIN:       ROLE_USER
-        ROLE_SUPER_ADMIN: ROLE_ADMIN
+        - { path: ^/admin(.*), role: IS_AUTHENTICATED_FULLY }
